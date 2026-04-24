@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% block title %}Shifts | Staff Scheduling Assistant{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Shifts</h1>
+    <a href="{{ url_for('shifts.new') }}" class="btn btn-primary">New shift</a>
+</div>
+
+{% if shifts %}
+<table class="data-table">
+    <thead>
+        <tr>
+            <th>Date</th>
+            <th>Day</th>
+            <th>Start</th>
+            <th>End</th>
+            <th>Role</th>
+            <th>Min Staff</th>
+            <th>Assigned</th>
+            <th>Notes</th>
+            <th class="actions-col">Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for s in shifts %}
+        <tr class="{% if s.is_understaffed() %}row-warn{% endif %}">
+            <td>{{ s.date.isoformat() }}</td>
+            <td>{{ s.date.strftime('%a') }}</td>
+            <td>{{ s.start_time.strftime('%H:%M') }}</td>
+            <td>{{ s.end_time.strftime('%H:%M') }}</td>
+            <td>{{ s.required_role }}</td>
+            <td>{{ s.min_staff }}</td>
+            <td>
+                {{ s.assignments|length }}
+                {% if s.is_understaffed() %}<span class="badge badge-warn">short</span>{% endif %}
+            </td>
+            <td>{{ s.notes or '' }}</td>
+            <td class="actions">
+                <a href="{{ url_for('shifts.edit', shift_id=s.id) }}" class="btn btn-small">Edit</a>
+                <form action="{{ url_for('shifts.delete', shift_id=s.id) }}" method="post"
+                      class="inline-form" onsubmit="return confirm('Delete this shift and its assignments?')">
+                    <button type="submit" class="btn btn-small btn-danger">Delete</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p class="empty">No shifts yet. Run <code>python seed.py</code> or click "New shift".</p>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard | Staff Scheduling Assistant{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Dashboard</h1>
+    <span class="hint">Week of {{ week_start.strftime('%b %d') }} to {{ week_end.strftime('%b %d, %Y') }}</span>
+</div>
+
+<div class="stats-grid">
+    <div class="stat-card">
+        <span class="stat-label">Employees</span>
+        <span class="stat-value">{{ stats.employee_count }}</span>
+    </div>
+    <div class="stat-card">
+        <span class="stat-label">Shifts this week</span>
+        <span class="stat-value">{{ stats.shift_count_this_week }}</span>
+    </div>
+    <div class="stat-card">
+        <span class="stat-label">Assignments</span>
+        <span class="stat-value">{{ stats.assignment_count_this_week }}</span>
+    </div>
+    <div class="stat-card {% if stats.conflict_count > 0 %}stat-warn{% endif %}">
+        <span class="stat-label">Conflicts</span>
+        <span class="stat-value">{{ stats.conflict_count }}</span>
+    </div>
+</div>
+
+<div class="dashboard-actions">
+    <a href="{{ url_for('schedule.index') }}" class="btn btn-primary">View schedule</a>
+    <a href="{{ url_for('employees.index') }}" class="btn btn-secondary">Manage employees</a>
+    <a href="{{ url_for('shifts.index') }}" class="btn btn-secondary">Manage shifts</a>
+</div>
+
+<section class="section">
+    <h2>Recent activity</h2>
+    {% if recent_audit %}
+    <table class="data-table small">
+        <thead>
+            <tr>
+                <th>Time</th>
+                <th>Actor</th>
+                <th>Action</th>
+                <th>Entity</th>
+                <th>Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for entry in recent_audit %}
+            <tr>
+                <td>{{ entry.timestamp.strftime('%Y-%m-%d %H:%M') }}</td>
+                <td>{{ entry.actor }}</td>
+                <td><span class="action-tag action-{{ entry.action }}">{{ entry.action }}</span></td>
+                <td>{{ entry.entity_type }}{% if entry.entity_id %} #{{ entry.entity_id }}{% endif %}</td>
+                <td class="desc-cell">{{ entry.description }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <p class="hint"><a href="{{ url_for('audit.index') }}">View full audit log</a></p>
+    {% else %}
+    <p class="empty">No activity recorded yet.</p>
+    {% endif %}
+</section>
+{% endblock %}

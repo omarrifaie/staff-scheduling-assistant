@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% block title %}Employees | Staff Scheduling Assistant{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Employees</h1>
+    <a href="{{ url_for('employees.new') }}" class="btn btn-primary">New employee</a>
+</div>
+
+{% if employees %}
+<table class="data-table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Role</th>
+            <th>Type</th>
+            <th>Max Hours</th>
+            <th>Weekly Availability</th>
+            <th class="actions-col">Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for emp in employees %}
+        <tr>
+            <td>{{ emp.name }}</td>
+            <td>{{ emp.role }}</td>
+            <td>{{ emp.employment_type_label() }}</td>
+            <td>{{ emp.max_hours_per_week }}</td>
+            <td class="availability-cell">{{ emp.availability_summary() }}</td>
+            <td class="actions">
+                <a href="{{ url_for('employees.edit', employee_id=emp.id) }}" class="btn btn-small">Edit</a>
+                <form action="{{ url_for('employees.delete', employee_id=emp.id) }}" method="post"
+                      class="inline-form" onsubmit="return confirm('Delete {{ emp.name }}? This also removes their assignments.')">
+                    <button type="submit" class="btn btn-small btn-danger">Delete</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p class="empty">No employees yet. Run <code>python seed.py</code> or click "New employee".</p>
+{% endif %}
+{% endblock %}

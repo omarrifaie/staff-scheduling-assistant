@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block title %}Sign in | Staff Scheduling Assistant{% endblock %}
+
+{% block content %}
+<div class="login-wrap">
+    <h1>Staff Scheduling Assistant</h1>
+    <p class="hint">Admin sign in. Default seeded credentials: <code>admin</code> / <code>admin123</code></p>
+
+    <form method="post" class="form">
+        <div class="form-group">
+            <label for="username">Username</label>
+            <input type="text" id="username" name="username" autofocus required>
+        </div>
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" required>
+        </div>
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Sign in</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

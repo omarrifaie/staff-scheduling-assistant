@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% block title %}Audit Log | Staff Scheduling Assistant{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Audit log</h1>
+    <span class="hint">{{ total }} entries total</span>
+</div>
+
+<p class="hint">Every create, update, delete, schedule generation, and sign in event is recorded here.</p>
+
+{% if entries %}
+<table class="data-table">
+    <thead>
+        <tr>
+            <th>Time</th>
+            <th>Actor</th>
+            <th>Action</th>
+            <th>Entity</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for e in entries %}
+        <tr>
+            <td class="ts-cell">{{ e.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+            <td>{{ e.actor }}</td>
+            <td><span class="action-tag action-{{ e.action }}">{{ e.action }}</span></td>
+            <td>{{ e.entity_type }}{% if e.entity_id %} #{{ e.entity_id }}{% endif %}</td>
+            <td class="desc-cell">{{ e.description }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% if total_pages > 1 %}
+<nav class="pagination">
+    {% if page > 1 %}
+        <a href="?page={{ page - 1 }}" class="btn btn-small btn-secondary">Previous</a>
+    {% else %}
+        <span></span>
+    {% endif %}
+    <span class="hint">Page {{ page }} of {{ total_pages }}</span>
+    {% if page < total_pages %}
+        <a href="?page={{ page + 1 }}" class="btn btn-small btn-secondary">Next</a>
+    {% else %}
+        <span></span>
+    {% endif %}
+</nav>
+{% endif %}
+
+{% else %}
+<p class="empty">No audit entries yet.</p>
+{% endif %}
+{% endblock %}

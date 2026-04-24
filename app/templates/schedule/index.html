@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+{% block title %}Schedule | Staff Scheduling Assistant{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Weekly schedule</h1>
+    <div class="week-nav">
+        <a href="{{ url_for('schedule.index', week_start=prev_week.isoformat()) }}" class="btn btn-secondary">Previous week</a>
+        <span class="week-label">
+            {{ week_start.strftime('%b %d') }} to {{ week_end.strftime('%b %d, %Y') }}
+        </span>
+        <a href="{{ url_for('schedule.index', week_start=next_week.isoformat()) }}" class="btn btn-secondary">Next week</a>
+    </div>
+</div>
+
+<div class="schedule-controls">
+    <form action="{{ url_for('schedule.generate') }}" method="post" class="inline-form">
+        <input type="hidden" name="week_start" value="{{ week_start.isoformat() }}">
+        <button type="submit" class="btn btn-primary">Auto generate</button>
+    </form>
+    <form action="{{ url_for('schedule.clear') }}" method="post" class="inline-form"
+          onsubmit="return confirm('Clear all assignments for this week?')">
+        <input type="hidden" name="week_start" value="{{ week_start.isoformat() }}">
+        <button type="submit" class="btn btn-warning">Clear week</button>
+    </form>
+    <a href="{{ url_for('export.export_csv', week_start=week_start.isoformat()) }}" class="btn btn-secondary">Export CSV</a>
+    <a href="{{ url_for('export.export_pdf', week_start=week_start.isoformat()) }}" class="btn btn-secondary">Export PDF</a>
+</div>
+
+{% if conflicts %}
+<section class="conflicts">
+    <h2>Conflicts &amp; coverage ({{ conflicts|length }})</h2>
+    <ul>
+        {% for c in conflicts %}
+        <li class="conflict conflict-{{ c.type }}">
+            {% if c.type == 'understaffed' %}
+                <strong>Understaffed:</strong>
+                {{ c.shift_label }} has {{ c.assigned_count }} of {{ c.required }} required.
+            {% elif c.type == 'double_booking' %}
+                <strong>Double booking:</strong> {{ c.description }}
+            {% endif %}
+        </li>
+        {% endfor %}
+    </ul>
+</section>
+{% else %}
+<p class="note-success">No conflicts for this week. All shifts meet their minimum staff requirements.</p>
+{% endif %}
+
+<div class="schedule-grid">
+    {% for day, day_shifts in by_day.items() %}
+    <section class="day-column">
+        <h3>{{ day.strftime('%A') }}<br><span class="day-date">{{ day.strftime('%b %d') }}</span></h3>
+        {% if day_shifts %}
+            {% for shift in day_shifts %}
+            <div class="shift-card {% if shift.is_understaffed() %}shift-understaffed{% endif %}">
+                <header>
+                    <span class="shift-time">{{ shift.start_time.strftime('%H:%M') }} to {{ shift.end_time.strftime('%H:%M') }}</span>
+                    <span class="shift-role">{{ shift.required_role }}</span>
+                </header>
+                {% if shift.notes %}
+                <small class="shift-notes">{{ shift.notes }}</small>
+                {% endif %}
+                <div class="staff-count {% if shift.is_understaffed() %}short{% endif %}">
+                    {{ shift.assignments|length }} / {{ shift.min_staff }} assigned
+                </div>
+                {% if shift.assignments %}
+                <ul class="assignment-list">
+                    {% for a in shift.assignments %}
+                    <li>
+                        <span>{{ a.employee.name }}</span>
+                        <form action="{{ url_for('schedule.unassign', assignment_id=a.id) }}" method="post" class="inline-form"
+                              onsubmit="return confirm('Remove {{ a.employee.name }} from this shift?')">
+                            <input type="hidden" name="week_start" value="{{ week_start.isoformat() }}">
+                            <button type="submit" class="link-button" title="Remove">x</button>
+                        </form>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+                <details class="assign-details">
+                    <summary>Assign manually</summary>
+                    <form action="{{ url_for('schedule.assign') }}" method="post" class="assign-form">
+                        <input type="hidden" name="shift_id" value="{{ shift.id }}">
+                        <input type="hidden" name="week_start" value="{{ week_start.isoformat() }}">
+                        <select name="employee_id" required>
+                            {% for e in employees if e.role == shift.required_role %}
+                                <option value="{{ e.id }}">{{ e.name }} ({{ e.employment_type_label() }})</option>
+                            {% endfor %}
+                        </select>
+                        <button type="submit" class="btn btn-small">Add</button>
+                    </form>
+                </details>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p class="empty-small">No shifts</p>
+        {% endif %}
+    </section>
+    {% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% block title %}{% if employee %}Edit{% else %}New{% endif %} Employee | Staff Scheduling Assistant{% endblock %}
+
+{% block content %}
+<h1>{% if employee %}Edit employee{% else %}New employee{% endif %}</h1>
+
+<form method="post" class="form">
+    <div class="form-grid">
+        <div class="form-group">
+            <label for="name">Name</label>
+            <input type="text" id="name" name="name" required
+                   value="{{ employee.name if employee else '' }}">
+        </div>
+        <div class="form-group">
+            <label for="role">Role</label>
+            <select id="role" name="role" required>
+                {% for r in roles %}
+                    <option value="{{ r }}" {% if employee and employee.role == r %}selected{% endif %}>{{ r }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="employment_type">Employment type</label>
+            <select id="employment_type" name="employment_type">
+                {% for t in employment_types %}
+                    <option value="{{ t }}" {% if employee and employee.employment_type == t %}selected{% endif %}>
+                        {{ t.replace('_', ' ').title() }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="max_hours_per_week">Max hours per week</label>
+            <input type="number" id="max_hours_per_week" name="max_hours_per_week"
+                   min="1" max="80"
+                   value="{{ employee.max_hours_per_week if employee else 40 }}">
+        </div>
+    </div>
+
+    <fieldset class="availability-fieldset">
+        <legend>Weekly availability</legend>
+        <p class="hint">Leave a row blank if the employee is not available that day. End time must be later than start time.</p>
+        <table class="availability-table">
+            <thead>
+                <tr>
+                    <th>Day</th>
+                    <th>Start</th>
+                    <th>End</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for i in range(7) %}
+                {% set existing = none %}
+                {% if employee %}
+                    {% for a in employee.availabilities if a.day_of_week == i %}
+                        {% set existing = a %}
+                    {% endfor %}
+                {% endif %}
+                <tr>
+                    <td>{{ days[i] }}</td>
+                    <td><input type="time" name="avail_{{ i }}_start"
+                               value="{{ existing.start_time.strftime('%H:%M') if existing else '' }}"></td>
+                    <td><input type="time" name="avail_{{ i }}_end"
+                               value="{{ existing.end_time.strftime('%H:%M') if existing else '' }}"></td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </fieldset>
+
+    <div class="form-actions">
+        <button type="submit" class="btn btn-primary">
+            {% if employee %}Save changes{% else %}Create employee{% endif %}
+        </button>
+        <a href="{{ url_for('employees.index') }}" class="btn btn-secondary">Cancel</a>
+    </div>
+</form>
+{% endblock %}
