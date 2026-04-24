@@ -14,7 +14,8 @@
 </div>
 
 <div class="schedule-controls">
-    <form action="{{ url_for('schedule.generate') }}" method="post" class="inline-form">
+    <form action="{{ url_for('schedule.generate') }}" method="post" class="inline-form"
+          onsubmit="return confirm('This will overwrite the existing schedule for this week. Continue?')">
         <input type="hidden" name="week_start" value="{{ week_start.isoformat() }}">
         <button type="submit" class="btn btn-primary">Auto generate</button>
     </form>

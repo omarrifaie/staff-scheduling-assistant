@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 from .models import Assignment, Employee, Shift, db
 
@@ -15,13 +15,6 @@ def _employee_available_for_shift(employee, shift):
 
 def _times_overlap(a_start, a_end, b_start, b_end):
     return not (a_end <= b_start or a_start >= b_end)
-
-
-def _shift_hours(start_time, end_time, shift_date=None):
-    ref_date = shift_date or datetime.today().date()
-    start = datetime.combine(ref_date, start_time)
-    end = datetime.combine(ref_date, end_time)
-    return (end - start).total_seconds() / 3600.0
 
 
 def generate_schedule(start_date, end_date):

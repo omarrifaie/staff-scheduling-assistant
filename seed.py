@@ -164,7 +164,7 @@ def seed():
         print(f"  Assignments: {result['assignments_created']}")
         print(f"  Conflicts:   {len(result['conflicts'])}")
         print()
-        print('Start the app with: flask run')
+        print('Start the app with: flask --app wsgi run')
         print('Then sign in at http://127.0.0.1:5000 with admin / admin123')
 
 

@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git -C \"C:/Users/Omar-/OneDrive/Desktop/staff-scheduling-assistant\" config user.name)",
+      "Bash(git -C \"C:/Users/Omar-/OneDrive/Desktop/staff-scheduling-assistant\" config user.email)",
+      "Bash(git -C \"C:/Users/Omar-/OneDrive/Desktop/staff-scheduling-assistant\" config user.name \"omarrifaie\")",
+      "Bash(git -C \"C:/Users/Omar-/OneDrive/Desktop/staff-scheduling-assistant\" config user.email \"omar.rifaie2@gmail.com\")",
+      "Bash(git -C \"C:/Users/Omar-/OneDrive/Desktop/staff-scheduling-assistant\" config --local --list)",
+      "Bash(python -m venv venv)",
+      "Bash(./venv/Scripts/python.exe -m pip install --quiet --upgrade pip)",
+      "Bash(./venv/Scripts/python.exe -m pip install --quiet -r requirements.txt)",
+      "Bash(./venv/Scripts/python.exe -m pip list)",
+      "Bash(./venv/Scripts/python.exe seed.py)",
+      "Bash(taskkill //F //IM python.exe)",
+      "Bash(grep -v \"^drwxr-xr-x 1 .* \\\\.\\\\.*$\")",
+      "Bash(python -m venv .verify_venv)",
+      "Bash(./.verify_venv/Scripts/python.exe -m pip install --quiet -r requirements.txt)",
+      "Bash(./.verify_venv/Scripts/python.exe seed.py)",
+      "Bash(./.verify_venv/Scripts/python.exe -m flask --app wsgi run --port 5052)",
+      "Bash(xargs printf *)"
+    ]
+  }
+}

@@ -10,15 +10,14 @@ For the original team this was built for (15+ employees across five roles), it r
 
 ## Features
 
-* Employee management (create, edit, delete) with name, role, employment type (full-time or part-time), per-day weekly availability, and maximum hours per week.
-* Shift management with date, start and end times, required role, minimum staff count, and notes.
-* Auto scheduler that assigns employees to shifts while respecting availability, role requirements, weekly max hours, and same-day overlap.
-* Conflict detection that flags understaffed shifts and any double booking, with warnings surfaced on the schedule view and the dashboard.
-* Manual overrides from the schedule view: assign or remove individual employees per shift with live eligibility checks.
-* Week navigator for viewing past or future weeks, plus one click regeneration and one click clear for a given week.
+* Employee CRUD with role, employment type (full-time or part-time), max weekly hours, and per-day availability.
+* Shift CRUD with date, time window, required role, minimum staff, and notes.
+* Auto scheduler that respects availability, role, weekly max hours, and same-day overlap.
+* Conflict detector that flags understaffed shifts and double bookings.
+* Manual assign and unassign from the schedule view, with live eligibility checks.
+* Admin dashboard with at-a-glance stats and one-click regenerate or clear for any week.
 * CSV and PDF export of the weekly schedule.
-* Admin dashboard protected by a login, with week at a glance stats for employees, shifts, assignments, and conflicts.
-* SQLite-backed audit history that records every create, update, delete, schedule generation, clear, and login event, including timestamp, actor, entity, and a descriptive line.
+* SQLite-backed audit log of every change, including timestamp, actor, entity, and description.
 
 ## Tech Stack
 
@@ -38,6 +37,8 @@ source venv/bin/activate          # on Windows: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
+For production use, set the `FLASK_SECRET_KEY` environment variable to override the bundled fallback secret.
+
 ## Usage
 
 Seed the database with sample data and an initial auto generated schedule:
@@ -46,18 +47,31 @@ Seed the database with sample data and an initial auto generated schedule:
 python seed.py
 ```
 
-Seeding creates a default admin user, 16 sample employees across five roles, a full week of sample shifts, and runs the auto scheduler so you can see a populated dashboard immediately.
+Seeding creates a default admin user, 18 sample employees across five roles, a full week of sample shifts, and runs the auto scheduler so you can see a populated dashboard immediately.
 
 Start the Flask development server:
 
 ```bash
-flask run
+flask --app wsgi run
 ```
 
 Open http://127.0.0.1:5000 in a browser and sign in:
 
 * Username: `admin`
 * Password: `admin123`
+
+The `admin` / `admin123` pair is a local demonstration credential. Rotate it from a Python shell:
+
+```python
+from app import create_app
+from app.models import AdminUser, db
+
+app = create_app()
+with app.app_context():
+    user = AdminUser.query.filter_by(username='admin').first()
+    user.set_password('your_new_password')
+    db.session.commit()
+```
 
 From the admin dashboard you can:
 
@@ -80,9 +94,11 @@ staff-scheduling-assistant/
 │   ├── blueprints/          Route blueprints: auth, dashboard, employees, shifts, schedule, audit, export
 │   ├── templates/           Jinja2 templates
 │   └── static/              CSS
+├── wsgi.py                  Entry point for `flask --app wsgi run`
 ├── seed.py                  Loads sample data and runs the scheduler
 ├── requirements.txt         Python dependencies
 ├── .gitignore
+├── LICENSE
 └── README.md
 ```
 
