@@ -3,6 +3,8 @@ a full week of sample shifts, and an auto generated schedule.
 
 Run with: python seed.py
 """
+import os
+import secrets
 from datetime import date, time, timedelta
 
 from app import create_app
@@ -104,9 +106,13 @@ def seed():
         db.drop_all()
         db.create_all()
 
-        print('Creating admin user (username: admin, password: admin123)...')
+        admin_password = os.environ.get('SEED_ADMIN_PASSWORD')
+        if not admin_password:
+            admin_password = secrets.token_urlsafe(16)
+            print(f'Generated admin password: {admin_password}')
+        print('Creating admin user (username: admin)...')
         admin = AdminUser(username='admin')
-        admin.set_password('admin123')
+        admin.set_password(admin_password)
         db.session.add(admin)
         db.session.commit()
 
@@ -165,7 +171,7 @@ def seed():
         print(f"  Conflicts:   {len(result['conflicts'])}")
         print()
         print('Start the app with: flask --app wsgi run')
-        print('Then sign in at http://127.0.0.1:5000 with admin / admin123')
+        print('Then sign in at http://127.0.0.1:5000 as admin')
 
 
 if __name__ == '__main__':
