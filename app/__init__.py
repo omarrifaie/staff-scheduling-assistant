@@ -11,9 +11,16 @@ login_manager.login_view = 'auth.login'
 
 
 def create_app(test_config=None):
+    secret_key = os.environ.get('FLASK_SECRET_KEY')
+    if not secret_key:
+        raise RuntimeError(
+            'FLASK_SECRET_KEY environment variable is not set. '
+            'Please set it to a secure random value before starting the app.'
+        )
+
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_mapping(
-        SECRET_KEY=os.environ.get('FLASK_SECRET_KEY', 'change-this-in-production'),
+        SECRET_KEY=secret_key,
         SQLALCHEMY_DATABASE_URI=(
             'sqlite:///'
             + os.path.join(app.instance_path, 'scheduling.db').replace('\\', '/')
